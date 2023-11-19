@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: friends-ns
+  name: friends
+  labels:
+    app: friends-app
+    env: dev
+spec:
+  containers:
+    - env:
+        - name: DATA
+          value: sample
+      image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000
