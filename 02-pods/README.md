@@ -34,3 +34,12 @@ kubectl run busybox --image=busybox:1.36.1 --env="FRIENDS_HOST=$FRIENDS_IP" --rm
 
 ![rancher-desktop-pod-status.png](assets%2Francher-desktop-pod-status.png)
 
+### Dry run
+
+```shell
+kubectl run friends --image=friends-service:0.1.0  --port=8000 --env="DATA=sample" --labels="app=friends-app,env=dev"  -o yaml --dry-run=client
+# Change command and replace pod 
+kubectl run friends --image=friends-service:0.1.0  --port=8000 --env="DATA=sample" --labels="app=friends-app,env=dev"  -o yaml > ./02-pods/deployments/friends-pod-updated.yml --dry-run=client -- sh -c 'deno --version; deno run --allow-net index.ts'
+kubectl replace --force=true -f 02-pods/deployments/friends-pod-updated.yml
+kubectl logs friends
+```
