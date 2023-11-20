@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: random-fail-job
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      containers:
+        - name: random-fail-container
+          image: alpine:3.17.3
+          command: ["/bin/sh", "-c"]
+          args:
+            -  |
+              # Generate a random number between 0 and 9
+              rand=$(( RANDOM % 2 ))
+              # Simulate a failure with 50% probability
+              if [ $rand -eq 0 ]; then
+                exit 1  # Causes the pod to fail
+              else
+                echo $RANDOM | base64 | head -c 20
+              fi
+      restartPolicy: Never

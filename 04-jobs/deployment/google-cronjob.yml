@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: google-ping
+spec:
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 3
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        cron-job-name: google-ping
+    spec:
+      template:
+        metadata:
+          labels:
+            cron-job-name: google-ping
+        spec:
+          containers:
+            - name: curl-container
+              image: curlimages/curl:latest
+              command: ["curl", "google.com"]
+          restartPolicy: OnFailure

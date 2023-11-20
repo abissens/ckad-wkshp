@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: random-hash
+spec:
+  completions: 5
+  parallelism: 2
+  template:
+    spec:
+      containers:
+        - name: random-hash-container
+          image: alpine:3.17.3
+          command: ["/bin/sh", "-c"]
+          args:
+            - "sleep 60 ; echo $RANDOM | base64 | head -c 20"
+      restartPolicy: Never

@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: current-date
+spec:
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 3
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: current-date
+              image: alpine:3.17.3
+              command: ["/bin/sh", "-c"]
+              args:
+                - 'echo "Current date: $(date)"'
+          restartPolicy: OnFailure
