@@ -1,5 +1,13 @@
 ### kubectl pod manipulations 
 
+#### Big picture
+
+<img src="assets/kubelet-container-images.png" style="width:400px" alt="pods in kubernetes">
+
+src : https://learning.oreilly.com/library/view/certified-kubernetes-application/9781098152857/ch05.html#id134
+
+#### Manipulation 
+
 ```shell
 kubectl run friends --image=friends-service:0.1.0  --port=8000 --env="DATA=sample" --labels="app=friends-app,env=dev"
 # > pod/friends created
@@ -38,7 +46,7 @@ kubectl delete -f .\deployments\friends-pod.yml
 
 ![rancher-desktop-pod-status.png](assets%2Francher-desktop-pod-status.png)
 
-### Dry run
+#### Dry run
 
 ```shell
 kubectl run friends --image=friends-service:0.1.0  --port=8000 --env="DATA=sample" --labels="app=friends-app,env=dev"  -o yaml --dry-run=client
