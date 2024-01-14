@@ -70,7 +70,6 @@ Use quotes when special characters are in annotation values
 Reserved kubernetes annotations : https://kubernetes.io/docs/reference/labels-annotations-taints/
 
 ```shell
-
 kubectl create -f deployment/annotations.yml
 kubectl describe pod annotations-app | grep -C 2 Annotations:
 # Start Time:   Sun, 14 Jan 2024 15:16:54 +0100

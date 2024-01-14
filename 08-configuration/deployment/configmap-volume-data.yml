@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-vol-app
+spec:
+  containers:
+    - name: cm-vol-app-container
+      image: busybox
+      command: ["/bin/sh", "-c", "while true; do for file in /etc/config/*; do echo -e \"File: $file\n\"; cat \"$file\"; echo -e \"\n---\n\"; done; sleep 60; done"]
+      volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: cm-vol-configmap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-vol-configmap
+data:
+  TV_SHOW: friends
+  bestCharacter: Chandler Bing

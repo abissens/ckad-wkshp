@@ -1,7 +1,7 @@
 ### TODO
 
-- [ ] Config  
-- [ ] Labels and Annotations
+- [x] Config  
+- [x] Labels and Annotations
 - [ ] Deployment
 - [ ] Deployment strategies 
 - [ ] Service and Networking
@@ -9,6 +9,7 @@
 - [ ] Troubleshouting
 - [ ] Helm
 - [ ] Docker volumes
+- [ ] Command, Entrypoint, args, and command
 - [ ] Docker multi-stages
 - [ ] Exercices 
 - [ ] Exam preparation 

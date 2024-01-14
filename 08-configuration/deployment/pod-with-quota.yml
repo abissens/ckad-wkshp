@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-quota
+spec:
+  containers:
+    - image: nginx:1.18.0
+      name: secured-container
+      resources:
+        requests:
+          cpu: 0.5
+          memory: 512M
+        limits:
+          cpu: 1
+          memory: 1024M

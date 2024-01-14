@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-env-app
+spec:
+  containers:
+    - name: cm-env-app-container
+      image: busybox
+      command: ["/bin/sh", "-c", "while true; do env; sleep 60; done"]
+      envFrom:
+        - configMapRef:
+            name: cm-env-configmap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-env-configmap
+data:
+  TV_SHOW: friends
+  bestCharacter: Chandler Bing
