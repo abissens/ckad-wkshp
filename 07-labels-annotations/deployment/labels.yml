@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: labels-app
+  labels:
+    app: friends-app-with-labels
+    env: dev
+spec:
+  containers:
+    - image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000

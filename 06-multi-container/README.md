@@ -39,7 +39,6 @@ kubectl exec adapter-app -c adapter -- cat /var/log/nginx/formatted-access.log
 #### The Ambassador container
 
 ```shell
-kubectl delete -f deployment/ambassador.yml
 kubectl create -f deployment/ambassador.yml
 
 $POD_IP=kubectl describe pods ambassador-app | Select-String -Pattern '^IP:\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' | ForEach-Object { $_.Matches.Groups[1].Value }

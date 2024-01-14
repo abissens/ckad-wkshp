@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ml-app-1
+  labels:
+    app: friends-app-with-labels
+    env: dev
+spec:
+  containers:
+    - image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ml-app-2
+  labels:
+    app: friends-app-with-labels
+    env: qa
+spec:
+  containers:
+    - image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ml-app-3
+  labels:
+    app: friends-app-with-labels
+    env: prod
+    status: ready
+spec:
+  containers:
+    - image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-config
+  labels:
+    app: friends-app-with-labels
+    env: dev
+    type: config
+data:
+  default.conf: some text content
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ml-sc-pvc
+  labels:
+    app: friends-app-with-labels
+    env: dev
+    type: config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 25Mi
