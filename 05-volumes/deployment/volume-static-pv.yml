@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: static-pv-app
+spec:
+  volumes:
+    - name: logs-volume
+      persistentVolumeClaim:
+        claimName: db-static-pvc
+  containers:
+    - image: nginx:1.25.1
+      name: nginx
+      volumeMounts:
+        - mountPath: /var/log/nginx
+          name: logs-volume
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: db-static-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 25Mi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: db-static-pv
+spec:
+  capacity:
+    storage: 50Mi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain # optional - default to Retain - options are : Retain, Delete
+  hostPath:
+    path: /tmp/db-static
