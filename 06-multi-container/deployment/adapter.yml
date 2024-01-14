@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: adapter-app
+spec:
+  volumes:
+    - name: logs-volume
+      emptyDir: {}
+  containers:
+    - image: nginx:1.25.1
+      name: nginx
+      volumeMounts:
+        - mountPath: /var/log/nginx
+          name: logs-volume
+    - name: adapter
+      image: busybox:1.36.1
+      command: ["/bin/sh", "-c", "tail -n+1 -f /var/log/nginx/access.log | awk '{time = $4 \" \" $5; status = $9; method = $6; path = $7; print time \" - \" status \" - \" method \" - \" path}' > /var/log/nginx/formatted-access.log"]
+      volumeMounts:
+        - mountPath: /var/log/nginx
+          name: logs-volume
