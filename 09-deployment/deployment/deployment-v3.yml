@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friends-deployment
+  annotations:
+    kubernetes.io/change-cause: Update to version 0.3.0 of Friends app
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: friends-app
+  template: # Pod template
+    metadata:
+      labels:
+        app: friends-app
+    spec:
+      containers:
+        - image: friends-service:0.3.0 # change image version
+          name: friends
+          ports:
+            - containerPort: 8000

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friends-deployment
+spec:
+  selector:
+    matchLabels:
+      app: friends-app
+  template: # Pod template
+    metadata:
+      labels:
+        app: friends-app
+    spec:
+      containers:
+        - image: friends-service:0.3.0
+          name: friends
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 70m
+              memory: 120Mi
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: friends-deployment-scaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: friends-deployment
+  minReplicas: 3
+  maxReplicas: 5
+  metrics:
+    - resource:
+        name: cpu
+        target:
+          averageUtilization: 60
+          type: Utilization
+      type: Resource
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: AverageValue
+          averageValue: 70Mi

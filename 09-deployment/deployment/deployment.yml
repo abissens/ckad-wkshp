@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friends-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: friends-app
+  template: # Pod template
+    metadata:
+      labels:
+        app: friends-app
+    spec:
+      containers:
+        - image: friends-service:0.1.0
+          name: friends
+          ports:
+            - containerPort: 8000
