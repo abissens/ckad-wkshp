@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: friends-readiness-fail
+spec:
+  containers:
+    - image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000
+      readinessProbe:
+        exec:
+          command:
+            - exit 1
+        initialDelaySeconds: 2 # Delay in seconds until first check is executed. default = 0
+        periodSeconds: 20 # Interval for executing a check. default = 10
+        timeoutSeconds: 1 # Maximum number of seconds until check operation times out. default = 1
+        successThreshold: 2 # Number of successful check attempts until probe is considered successful after a failure. default = 1
+        failureThreshold: 2 # Number of failures for check attempts before probe is marked failed and takes action. default = 3

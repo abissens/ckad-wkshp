@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: friends-startup
+spec:
+  containers:
+    - image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+      startupProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        initialDelaySeconds: 20 # Delay in seconds until first check is executed. default = 0
+        periodSeconds: 20 # Interval for executing a check. default = 10
+        timeoutSeconds: 20 # Maximum number of seconds until check operation times out. default = 1
+        successThreshold: 1 # Number of successful check attempts until probe is considered successful after a failure. default = 1. must be 1 to startup
+        failureThreshold: 1 # Number of failures for check attempts before probe is marked failed and takes action. default = 3

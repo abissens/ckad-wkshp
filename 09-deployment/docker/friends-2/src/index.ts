@@ -1,9 +1,20 @@
 const apiVersion = '2';
 const hostname = Deno.hostname();
 
-const handler = async (_request: Request): Promise<Response> => {
-  const randomQuote = friendsQuotes[Math.floor(Math.random() * friendsQuotes.length)];
+const handler = async (request: Request): Promise<Response> => {
+  const {url} = request;
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${request.method} ${url}`);
 
+  if (url.endsWith('/health')) {
+    return new Response('app is running', {
+      status: 200,
+      headers: {
+        'content-type': 'text/plain',
+      },
+    });
+  }
+  const randomQuote = friendsQuotes[Math.floor(Math.random() * friendsQuotes.length)];
   return new Response(JSON.stringify({hostname, apiVersion, quote: randomQuote}), {
     status: 200,
     headers: {

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: friends-liveness
+spec:
+  containers:
+    - image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000
+      livenessProbe:
+        httpGet: # any valid http response 200-399
+          path: /health
+          port: 8000
+        initialDelaySeconds: 2 # Delay in seconds until first check is executed. default = 0
+        periodSeconds: 10 # Interval for executing a check. default = 10
+        timeoutSeconds: 1 # Maximum number of seconds until check operation times out. default = 1
+        successThreshold: 1 # Number of successful check attempts until probe is considered successful after a failure. default = 1. always 1 for livenessProbe
+        failureThreshold: 2 # Number of failures for check attempts before probe is marked failed and takes action. default = 3
+        terminationGracePeriodSeconds: 30 # Grace period before forcing a container to stop upon failure.

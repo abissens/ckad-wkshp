@@ -2,11 +2,12 @@
 
 - [x] Config  
 - [x] Labels and Annotations
+- [ ] Pod hostname usage ?
 - [ ] Deployment
 - [ ] Deployment strategies 
 - [ ] Service and Networking
 - [ ] Observability
-- [ ] Troubleshouting
+- [ ] Troubleshooting
 - [ ] Helm
 - [ ] Docker volumes
 - [ ] Command, Entrypoint, args, and command

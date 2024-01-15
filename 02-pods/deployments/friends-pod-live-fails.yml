@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: friends-liveness-fail
+spec:
+  containers:
+    - image: friends-service:0.1.0
+      name: friends
+      ports:
+        - containerPort: 8000
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 65535 # non existing port
