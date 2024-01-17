@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friends-deployment-rolling
+spec:
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 75% # the old replicaset can scale down to 25% = 1/4 pods if replicas = 4
+      maxSurge: 25% # Ok to have 125% pods at a time = 5 if replicas = 4
+  minReadySeconds: 20 # number of seconds in ready state before start serving requests
+  selector:
+    matchLabels:
+      app: friends-app
+  template:
+    metadata:
+      labels:
+        app: friends-app
+    spec:
+      containers:
+        - image: friends-service:0.1.0
+          name: friends
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000

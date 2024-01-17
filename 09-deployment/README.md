@@ -141,3 +141,50 @@ kubectl exec -it load-test-pod -- sh -c 'ab -n 100000 -c 100 http://10.42.0.2:80
 ```
 
 ![Autoscaler monitoring](assets/autoscaler.png)
+
+
+#### Deployment Strategies 
+##### RollingUpdate (default): Ramped Deployment Strategy
+
+Zero downtime
+Old and new versions of the application run in parallel
+
+```shell
+kubectl delete -f ./deployment/deployment-autoscaler.yml
+kubectl create -f ./deployment/deployment-rolling-update.yml
+
+# into another terminal
+while ($true) { [Console]::Clear(); kubectl get pods -l app=friends-app -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,READY:.status.containerStatuses[0].ready,CREATION:.metadata.creationTimestamp,IMAGE:.spec.containers[0].image; Start-Sleep -Seconds 5 }
+# NAME                                          LABELS                                              STATUS    READY   AGE
+# friends-deployment-rolling-6457dd594b-sst5q   map[app:friends-app pod-template-hash:6457dd594b]   Running   true    2024-01-15T20:20:59Z
+# friends-deployment-rolling-6457dd594b-zfmvk   map[app:friends-app pod-template-hash:6457dd594b]   Running   true    2024-01-15T20:20:59Z
+# friends-deployment-rolling-6457dd594b-x5f6r   map[app:friends-app pod-template-hash:6457dd594b]   Running   true    2024-01-15T20:20:59Z
+# friends-deployment-rolling-6457dd594b-7lsnw   map[app:friends-app pod-template-hash:6457dd594b]   Running   true    2024-01-15T20:20:59Z
+
+kubectl edit deployment friends-deployment-rolling
+# change container image and save
+```
+
+##### Recreate : Fixed Deployment Strategy
+The fixed deployment strategy will terminate replicas with the old application version at once 
+before creating another ReplicaSet that controls replicas running the new application version.
+
+```shell
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friends-deployment-rolling
+spec:
+  replicas: 4
+  strategy:
+    type: Recreate 
+  selector:
+...
+```
+
+##### App architecture based Deployment Strategies
+Not built-in
+Use of many Deployment objects at the same time
+Covered in Service chapter : 
+* Blue-Green Deployment Strategy
+* Canary Deployment Strategy
