@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friends-canary-new
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: friends-app
+      type: canary
+  template:
+    metadata:
+      labels:
+        app: friends-app
+        type: canary
+    spec:
+      containers:
+        - image: friends-service:0.3.0
+          name: friends
+          ports:
+            - containerPort: 8000

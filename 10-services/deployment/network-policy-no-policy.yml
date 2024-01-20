@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: np-nginx-backend
+  labels:
+    app: nginx-backend
+spec:
+  containers:
+    - image: nginx:1.25.1
+      name: nginx
+    - name: sidecar
+      image: busybox:1.36.1
+      env:
+        - name: HOST
+          value: np-nginx-frontend-service
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            status=$(wget  --timeout=5 --tries=1 -S http://$HOST:80 2>&1 | grep 'HTTP/' | awk '{print $2}')
+
+            if [ "$status" == "200" ]; then
+              echo "$(date): Successful HTTP request to $HOST:80. Status: $status"
+            else
+              echo "$(date): Unsuccessful HTTP request to $HOST:80. Status: $status"
+            fi
+
+            sleep 5;
+          done
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: np-nginx-frontend
+  labels:
+    app: nginx-frontend
+spec:
+  containers:
+    - image: nginx:1.25.1
+      name: nginx
+    - name: sidecar
+      image: busybox:1.36.1
+      env:
+        - name: HOST
+          value: np-nginx-backend-service
+      command:
+        - sh
+        - -c
+        - |
+          while true; do
+            status=$(wget --timeout=5 --tries=1 -S http://$HOST:80 2>&1 | grep 'HTTP/' | awk '{print $2}')
+
+            if [ "$status" == "200" ]; then
+              echo "$(date): Successful HTTP request to $HOST:80. Status: $status"
+            else
+              echo "$(date): Unsuccessful HTTP request to $HOST:80. Status: $status"
+            fi
+
+            sleep 5;
+          done
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-nginx-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx-backend
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-nginx-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx-frontend
+  ports:
+    - port: 80
+      targetPort: 80

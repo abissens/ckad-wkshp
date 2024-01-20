@@ -2,9 +2,9 @@
 
 - [x] Config  
 - [x] Labels and Annotations
-- [ ] Pod hostname usage ?
-- [ ] Deployment
-- [ ] Deployment strategies 
+- [x] Pod hostname usage ?
+- [x] Deployment
+- [x] Deployment strategies 
 - [ ] Service and Networking
 - [ ] Observability
 - [ ] Troubleshooting

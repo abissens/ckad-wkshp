@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friends-green-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: friends-app
+      type: green
+  template:
+    metadata:
+      labels:
+        app: friends-app
+        type: green
+    spec:
+      containers:
+        - image: friends-service:0.3.0
+          name: friends
+          ports:
+            - containerPort: 8000

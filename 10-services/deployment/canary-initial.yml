@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: friends-canary
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: friends-app
+      type: stable
+  template:
+    metadata:
+      labels:
+        app: friends-app
+        type: stable
+    spec:
+      containers:
+        - image: friends-service:0.1.0
+          name: friends
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: friends-canary-service
+spec:
+  type: ClusterIP
+  selector:
+    app: friends-app # all friends app pods are selected
+  ports:
+    - port: 80
+      targetPort: 8000
