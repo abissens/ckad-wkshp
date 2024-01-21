@@ -1,0 +1,11 @@
+{
+  "scripts": { },
+
+  "watcher": {
+    "interval": 350,
+    "exts": ["js", "jsx", "ts", "tsx", "json"],
+    "match": ["**/*.*"],
+    "skip": ["*/.git/*"],
+    "legacy": true
+  }
+}

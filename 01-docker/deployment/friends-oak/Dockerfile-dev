@@ -1,0 +1,13 @@
+FROM denoland/deno:1.38.4
+
+RUN deno install --allow-read --allow-run --allow-write --allow-net -f --unstable https://deno.land/x/denon/denon.ts
+
+# USER deno -> denon need root permissions
+WORKDIR /app
+
+# ADD src /app -> mount as volume
+
+EXPOSE 8000
+
+ENTRYPOINT ["denon"]
+CMD ["run", "--allow-net", "index.ts"]
