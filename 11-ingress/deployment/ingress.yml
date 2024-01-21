@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: friends-ing-pod
+  labels:
+    app: friends-ing-app
+spec:
+  containers:
+    - image: friends-service:0.3.0
+      name: friends
+      ports: [ { containerPort: 8000 } ]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: friends-ing-service
+spec:
+  type: ClusterIP
+  selector:
+    app: friends-ing-app
+  ports:
+    - port: 80
+      targetPort: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: friends-ing-basic
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /friends-basic
+            pathType: Prefix # Path types are Prefix, Exact and ImplementationSpecific
+            backend:
+              service:
+                name: friends-ing-service
+                port:
+                  number: 80 # service port

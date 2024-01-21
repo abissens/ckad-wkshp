@@ -17,7 +17,7 @@
 - [ ] Understand authentication, authorization and admission control
 - [ ] Statefull set ?
 - [ ] Docker volumes
-- [ ] Command, Entrypoint, args, and command
-- [ ] Docker multi-stages
+- [x] Command, Entrypoint, args, and command
+- [x] Docker multi-stages
 - [ ] Exercices 
 - [ ] Exam preparation 
