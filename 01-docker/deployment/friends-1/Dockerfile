@@ -3,7 +3,7 @@ FROM denoland/deno:1.38.2
 USER deno
 
 WORKDIR /app
-ADD ./src /app
+ADD src /app
 
 EXPOSE 8000
 

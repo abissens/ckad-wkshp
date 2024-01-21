@@ -2,11 +2,10 @@
 
 Exam handbook : https://docs.linuxfoundation.org/tc-docs/certification/lf-handbook2
 Kubernetes documentation : https://kubernetes.io/docs/home/
-Kubernetes playground : https://labs.play-with-k8s.com/
 CKAD exercices repo : https://github.com/dgkanatsios/CKAD-exercises
 Kubernetes learning resources repo : https://github.com/kubernauts/Kubernetes-Learning-Resources
 Exam guide: https://learning.oreilly.com/library/view/certified-kubernetes-application/9781098152857/
-
+Exam tips : https://dev.to/devdpk/ckad-tips-2023-3n13
 
 ### Usefull commands 
 

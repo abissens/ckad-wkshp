@@ -5,10 +5,17 @@
 - [x] Pod hostname usage ?
 - [x] Deployment
 - [x] Deployment strategies 
-- [ ] Service and Networking
-- [ ] Observability
-- [ ] Troubleshooting
+- [x] Service and Networking
+- [x] Observability
+- [x] Troubleshooting
 - [ ] Helm
+- [ ] Use Ingress rules to expose applications
+- [ ] Custom resources (CRD)
+- [ ] RBAC 
+- [ ] API deprecation
+- [ ] Discover and use resources that extend Kubernetes (CRD, Operators)
+- [ ] Understand authentication, authorization and admission control
+- [ ] Statefull set ?
 - [ ] Docker volumes
 - [ ] Command, Entrypoint, args, and command
 - [ ] Docker multi-stages
