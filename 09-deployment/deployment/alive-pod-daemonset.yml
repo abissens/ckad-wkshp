@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: alive-pod-daemonset
+spec:
+  selector:
+    matchLabels:
+      app: alive-pod
+  template:
+    metadata:
+      labels:
+        app: alive-pod
+    spec:
+      serviceAccountName: sa-with-rights
+      containers:
+        - name: write-container
+          image: alpine:3.19
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef: { fieldPath: spec.nodeName }
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef: { fieldPath: metadata.namespace }
+          command: [ '/bin/sh', '-c' ]
+          args:
+            - |
+              apk --no-cache add jq curl
+              while true; do
+                TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                HOSTNAME=$(hostname) # this is also pod name
+                TIMESTAMP=$(curl -k -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api/v1/namespaces/default/pods/$HOSTNAME | jq -r '.metadata.creationTimestamp')
+                FORMATTED_TIMESTAMP=$(echo $TIMESTAMP | tr 'T' ' ' | tr -d 'Z')
+                AGE_SECONDS=$(( $(date -u +%s) - $(date -d "$FORMATTED_TIMESTAMP" +%s) ))
+                echo "Hi, I am a little POD, my name is $HOSTNAME, I am running on node $NODE_NAME, my namespace is $NAMESPACE and my age is $AGE_SECONDS seconds." >> /data/message.txt
+                sleep 60
+              done
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      restartPolicy: Always
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: alive-pod-daemonset-data-pvc
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: alive-pod-daemonset-data-pvc
+  labels:
+    app: alive-pod
+spec:
+  accessModes: [ ReadWriteOnce ]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 25Mi

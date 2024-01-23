@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: alive-pod-statefulset
+spec:
+  serviceName: alive-pod-service # statefulset must have a service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: alive-pod
+  template:
+    metadata:
+      labels:
+        app: alive-pod
+    spec:
+      serviceAccountName: sa-with-rights
+      containers:
+        - name: write-container
+          image: alpine:3.19
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef: { fieldPath: spec.nodeName }
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef: { fieldPath: metadata.namespace }
+          command: [ '/bin/sh', '-c' ]
+          args:
+            - |
+              apk --no-cache add jq curl
+              HOSTNAME=$(hostname) # this is also pod name
+              while true; do
+                TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                TIMESTAMP=$(curl -k -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api/v1/namespaces/default/pods/$HOSTNAME | jq -r '.metadata.creationTimestamp')
+                FORMATTED_TIMESTAMP=$(echo $TIMESTAMP | tr 'T' ' ' | tr -d 'Z')
+                AGE_SECONDS=$(( $(date -u +%s) - $(date -d "$FORMATTED_TIMESTAMP" +%s) ))
+                echo "Hi, I am a little POD, my name is $HOSTNAME, I am running on node $NODE_NAME, my namespace is $NAMESPACE and my age is $AGE_SECONDS seconds." >> /data/message.txt
+                sleep 60
+              done
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app: alive-pod
+      spec:
+        accessModes: [ ReadWriteOnce ]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 25Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alive-pod-service
+  labels:
+    app: alive-pod
+spec:
+  ports:
+    - port: 80
+      name: web
+  clusterIP: None # this is a headless service (no exposition)
+  selector:
+    app: alive-pod

@@ -29,6 +29,7 @@ kubectl get deployment friends-deployment
 # friends-deployment   3/4     4            3           6m20s
 
 kubectl get pods -l app=friends-app
+# NOTICE the ID change
 # NAME                                 READY   STATUS    RESTARTS      AGE
 # friends-deployment-f5bc6f64b-z2pjg   1/1     Running   0             6m21s
 # friends-deployment-f5bc6f64b-87ngz   1/1     Running   0             6m21s
@@ -188,3 +189,95 @@ Use of many Deployment objects at the same time
 Covered in Service chapter : 
 * Blue-Green Deployment Strategy
 * Canary Deployment Strategy
+
+##### Statefulset 
+
+* A StatefulSet in Kubernetes is used to manage stateful applications. 
+* Unlike Deployments, StatefulSets provide guarantees about the ordering and uniqueness of pods.
+* Each pod in a StatefulSet gets a unique and stable hostname, and they are created in order, one at a time.
+* They have stable storage identity
+* Service is mandatory (at least headless = no exposition) 
+
+```shell
+# need service account with rights 
+kubectl create -f ../08-configuration/deployment/service-account.yml
+
+# Start with a deployment replicaset
+kubectl create -f ./deployment/alive-pod-replicaset.yml
+$POD_NAME=kubectl get pods -l  app=alive-pod  -o jsonpath='{.items[0].metadata.name}'
+kubectl exec $POD_NAME -- cat /data/message.txt
+# Hi, I am a little POD, my name is alive-pod-deployment-59dbd6759f-l5fw5, i am running on node hbensassi2-pc, my namespace is default and I my age is 594 seconds.
+# Hi, I am a little POD, my name is alive-pod-deployment-59dbd6759f-zgpnn, i am running on node hbensassi2-pc, my namespace is default and I my age is 595 seconds.
+# Hi, I am a little POD, my name is alive-pod-deployment-59dbd6759f-75dms, i am running on node hbensassi2-pc, my namespace is default and I my age is 597 seconds.
+
+kubectl get pv,pvc 
+# NAME                                                        CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                   STORAGECLASS   REASON   AGE
+# persistentvolume/pvc-e11370ea-a67c-41a3-b5a4-9e355da91478   25Mi       RWO            Delete           Bound    default/alive-pod-deployment-data-pvc   local-path              99s
+# 
+# NAME                                                  STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+# persistentvolumeclaim/alive-pod-deployment-data-pvc   Bound    pvc-e11370ea-a67c-41a3-b5a4-9e355da91478   25Mi       RWO            local-path     102s
+
+
+
+kubectl delete -f ./deployment/alive-pod-replicaset.yml
+
+# Create a statefulset 
+kubectl create -f ./deployment/alive-pod-statefulset.yml
+
+kubectl get pods 
+# Notice they run in order and have identifiable names
+# NAME                      READY   STATUS    RESTARTS   AGE
+# alive-pod-statefulset-0   1/1     Running   0          14s
+# alive-pod-statefulset-1   1/1     Running   0          8s
+# alive-pod-statefulset-2   0/1     Pending   0          3s
+kubectl get pv,pvc
+# NAME                                                        CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                  STORAGECLASS   REASON   AGE
+# persistentvolume/pvc-d238f6fe-910f-4b81-b05b-740545590f73   25Mi       RWO            Delete           Bound    default/data-alive-pod-statefulset-0   local-path              99s        
+# persistentvolume/pvc-ae5308a2-ceec-4157-990d-4234058d522e   25Mi       RWO            Delete           Bound    default/data-alive-pod-statefulset-1   local-path              93s        
+# persistentvolume/pvc-0df8d795-0053-47db-b037-96ebb3d59a60   25Mi       RWO            Delete           Bound    default/data-alive-pod-statefulset-2   local-path              88s        
+# 
+# NAME                                                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+# persistentvolumeclaim/data-alive-pod-statefulset-0   Bound    pvc-d238f6fe-910f-4b81-b05b-740545590f73   25Mi       RWO            local-path     102s
+# persistentvolumeclaim/data-alive-pod-statefulset-1   Bound    pvc-ae5308a2-ceec-4157-990d-4234058d522e   25Mi       RWO            local-path     96s
+# persistentvolumeclaim/data-alive-pod-statefulset-2   Bound    pvc-0df8d795-0053-47db-b037-96ebb3d59a60   25Mi       RWO            local-path     91s
+
+kubectl exec alive-pod-statefulset-0 -- cat /data/message.txt
+# Hi, I am a little POD, my name is alive-pod-statefulset-0, I am running on node hbensassi2-pc, my namespace is default and my age is 1895 seconds.
+kubectl exec alive-pod-statefulset-1 -- cat /data/message.txt
+# Hi, I am a little POD, my name is alive-pod-statefulset-1, I am running on node hbensassi2-pc, my namespace is default and my age is 1899 seconds.
+kubectl exec alive-pod-statefulset-2 -- cat /data/message.txt
+# Hi, I am a little POD, my name is alive-pod-statefulset-2, I am running on node hbensassi2-pc, my namespace is default and my age is 1900 seconds.
+
+kubectl delete pod alive-pod-statefulset-1
+kubectl get pods 
+# NAME                      READY   STATUS    RESTARTS   AGE
+# alive-pod-statefulset-0   1/1     Running   0          5m57s
+# alive-pod-statefulset-2   1/1     Running   0          5m46s
+# alive-pod-statefulset-1   1/1     Running   0          21s
+
+# wait 1 minutes
+kubectl exec alive-pod-statefulset-1 -- cat /data/message.txt
+# Hi, I am a little POD, my name is alive-pod-statefulset-1, I am running on node hbensassi2-pc, my namespace is default and my age is 268 seconds.
+# Hi, I am a little POD, my name is alive-pod-statefulset-1, I am running on node hbensassi2-pc, my namespace is default and my age is 328 seconds.
+# Hi, I am a little POD, my name is alive-pod-statefulset-1, I am running on node hbensassi2-pc, my namespace is default and my age is 43 seconds.
+
+
+kubectl delete -f ./deployment/alive-pod-statefulset.yml
+kubectl delete pv,pvc --all
+kubectl get all,pv,pvc
+
+```
+
+##### Daemonset
+
+* Ensure a pod on each cluster node 
+
+```shell
+kubectl create -f ./deployment/alive-pod-daemonset.yml
+kubectl get pods 
+$POD_NAME=kubectl get pods -l  app=alive-pod  -o jsonpath='{.items[0].metadata.name}'
+kubectl exec $POD_NAME -- cat /data/message.txt
+# Hi, I am a little POD, my name is alive-pod-daemonset-4ghxq, I am running on node hbensassi2-pc, my namespace is default and my age is 11 seconds.
+
+kubectl delete -f ./deployment/alive-pod-daemonset.yml
+```

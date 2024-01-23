@@ -6,6 +6,7 @@ CKAD exercices repo : https://github.com/dgkanatsios/CKAD-exercises
 Kubernetes learning resources repo : https://github.com/kubernauts/Kubernetes-Learning-Resources
 Exam guide: https://learning.oreilly.com/library/view/certified-kubernetes-application/9781098152857/
 Exam tips : https://dev.to/devdpk/ckad-tips-2023-3n13
+Online exercises tool : https://killercoda.com/
 
 ### Usefull commands 
 
@@ -18,3 +19,11 @@ kubectl get namespaces --context <context>
 kubectl config set-context <context> --namespace=<namespace>
 kubectl config use-context <context>
 ```
+
+#### Utilities 
+
+````shell
+kubectl get all,pvc,pv
+kubectl delete all,pvc,pv -n default --all
+
+````
