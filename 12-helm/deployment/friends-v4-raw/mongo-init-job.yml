@@ -1,0 +1,90 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongo-rs-init-job
+spec:
+  completions: 1
+  template:
+    spec:
+      serviceAccountName: sa-with-rights
+      initContainers:
+        - image: bitnami/kubectl
+          name: make-rs
+          command: [ '/bin/sh' ]
+          args:
+            - /maker/init-mongo-rs.sh
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: maker
+              mountPath: /maker
+      containers:
+        - image: mongo:latest
+          name: mongo-rs-init
+          command: [ '/bin/sh', '-c' ]
+          args:
+            - | 
+              echo "running rs init"
+              cat /scripts/init-mongo-rs.js
+              mongosh --host mongo-0.mongo-srv --port 27017 --username mongo --password mongo --authenticationDatabase=admin --directConnection=true --file /scripts/init-mongo-rs.js
+              mongosh --host mongo-0.mongo-srv --port 27017 --username mongo --password mongo --authenticationDatabase=admin --directConnection=true --eval 'rs.status()'
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          emptyDir: {}
+        - name: maker
+          configMap:
+            name: mongo-rs-init-job-config-map
+      restartPolicy: Never
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-rs-init-job-config-map
+data:
+  init-mongo-rs.sh: |
+    until [ "$(kubectl get statefulset/mongo -o 'jsonpath={.status.readyReplicas}')" = "$(kubectl get statefulset/mongo -o 'jsonpath={.spec.replicas}')" ]; do
+      echo "Waiting for StatefulSet to be ready..."
+      sleep 15
+    done
+    MONGO_APP="mongo"
+    MONGO_ENV="dev"
+    pod_names=$(kubectl get pods -l app=$MONGO_APP -l env=$MONGO_ENV -o jsonpath='{.items[*].metadata.name}')
+    MEMBERS=""
+    service_name=$(kubectl get statefulset/mongo -o jsonpath='{.spec.serviceName}')
+    for pod_name in $pod_names; do
+      MEMBERS="$MEMBERS {_id: '$pod_name', host: '$pod_name.$service_name:27017'},"
+      echo "Pod: $pod_name, Service: $service_name"
+    done
+    MEMBERS=${MEMBERS%,}  # Remove the trailing comma
+    echo "Initializing MongoDB ReplicaSet with members: $MEMBERS"
+    echo "rs.initiate({_id: 'rs0', members: [$MEMBERS]})" > /scripts/init-mongo-rs.js
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-with-rights
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-pods
+subjects:
+  - kind: ServiceAccount
+    name: sa-with-rights
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-reader
+rules:
+  - apiGroups: ["", "apps"]
+    resources: ["pods", "statefulsets"]
+    verbs: ["get", "list"]

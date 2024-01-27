@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: friends-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: friends-app
+      env: dev
+  template:
+    metadata:
+      labels:
+        app: friends-app
+        env: dev
+    spec:
+      restartPolicy: Never
+      containers:
+        - env:
+            - name: DATABASE_TYPE
+              value: mongo
+            - name: DB_HOST
+              value: mongo-srv
+            - name: DB_PORT
+              value: '27017'
+            - name: DB_DATABASE
+              value: friends
+            - name: DB_USER
+              value: mongo
+            - name: DB_PASSWORD
+              value: mongo
+        - image: friends-service:0.4.0
+          name: friends
+          ports: { containerPort: 8000 }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: friends-service
+spec:
+  type: ClusterIP
+  selector:
+    app: friends-app
+    env: dev
+  ports:
+    - port: 80
+      targetPort: 8000

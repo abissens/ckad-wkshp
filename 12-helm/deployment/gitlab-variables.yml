@@ -1,0 +1,9 @@
+certmanager:
+  install: false
+
+global:
+  ingress:
+    configureCertmanager: false
+
+gitlab-runner:
+  install: false
